@@ -1,0 +1,5 @@
+*.o
+*.lbl
+*.lst
+*.map
+*.rom
