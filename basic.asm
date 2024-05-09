@@ -77,7 +77,7 @@ ut1_ph		= ut1_pl+1	; utility pointer 1 high byte
 ut2_pl		= $73		; utility pointer 2 low byte
 ut2_ph		= ut2_pl+1	; utility pointer 2 high byte
 
-Temp_2		= ut1_pl	; temp byte for block move	
+Temp_2		= ut1_pl	; temp byte for block move
 
 FACt_1		= $75		; FAC temp mantissa1
 FACt_2		= FACt_1+1	; FAC temp mantissa2
@@ -436,12 +436,12 @@ Ibuffs		= IRQ_vec+$14
 					; start of input buffer after IRQ/NMI code
 Ibuffe		= Ibuffs+$47; end of input buffer
 
-Ram_base		= $0300	; start of user RAM (set as needed, should be page aligned)
-Ram_top		= $C000	; end of user RAM+1 (set as needed, should be page aligned)
+Ram_base		= RAM_BASE	; start of user RAM (set as needed, should be page aligned)
+Ram_top		= RAM_TOP	; end of user RAM+1 (set as needed, should be page aligned)
 
 ; This start can be changed to suit your system
 
-	*=	$C000
+.segment "CODE"
 
 ; BASIC cold start entry point
 
@@ -1555,7 +1555,7 @@ LAB_1602
 	JMP	LAB_LET		; else go do implied LET
 
 LAB_1609
-	CMP	#[TK_TAB-$80]*2	; compare normalised token * 2 with TAB
+	CMP	#(TK_TAB-$80)*2	; compare normalised token * 2 with TAB
 	BCS	LAB_15D9		; branch if A>=TAB (do syntax error then warm start)
 					; only tokens before TAB can start a line
 	TAY				; copy to index
@@ -6280,7 +6280,7 @@ LAB_28C9
 	BIT	expneg		; test exponent -ve flag
 	BPL	LAB_28DB		; if +ve go evaluate exponent
 
-					; else do exponent = -exponent 
+					; else do exponent = -exponent
 	LDA	#$00			; clear result
 	SEC				; set carry for subtract
 	SBC	expcnt		; subtract exponent byte
@@ -6513,7 +6513,7 @@ LAB_29F5
 	STY	Sendl			; save output string index
 LAB_29F7
 	LDY	#$00			; clear index (point to 100,000)
-	LDX	#$80			; 
+	LDX	#$80			;
 LAB_29FB
 	LDA	FAC1_3		; get FAC1 mantissa3
 	CLC				; clear carry for add
@@ -6525,22 +6525,22 @@ LAB_29FB
 	LDA	FAC1_1		; get FAC1 mantissa1
 	ADC	LAB_2A9A,Y		; add -ve MSB
 	STA	FAC1_1		; save FAC1 mantissa1
-	INX				; 
-	BCS	LAB_2A18		; 
+	INX				;
+	BCS	LAB_2A18		;
 
 	BPL	LAB_29FB		; not -ve so try again
 
-	BMI	LAB_2A1A		; 
+	BMI	LAB_2A1A		;
 
 LAB_2A18
-	BMI	LAB_29FB		; 
+	BMI	LAB_29FB		;
 
 LAB_2A1A
-	TXA				; 
-	BCC	LAB_2A21		; 
+	TXA				;
+	BCC	LAB_2A21		;
 
-	EOR	#$FF			; 
-	ADC	#$0A			; 
+	EOR	#$FF			;
+	ADC	#$0A			;
 LAB_2A21
 	ADC	#'0'-1		; add "0"-1 to result
 	INY				; increment index ..
@@ -6563,9 +6563,9 @@ LAB_2A3B
 	STY	Sendl			; save output string index
 	LDY	Cvaral		; get current var address low byte
 	TXA				; get character back
-	EOR	#$FF			; 
-	AND	#$80			; 
-	TAX				; 
+	EOR	#$FF			;
+	AND	#$80			;
+	TAX				;
 	CPY	#$12			; compare index with max
 	BNE	LAB_29FB		; loop if not max
 
@@ -7065,7 +7065,7 @@ NextB1
 	BEQ	GoPr2			; if zero print whole string
 
 	BNE	GoPr1			; else go make output string
-	
+
 ; this is the exit code and is also used by HEX$()
 ; truncate string to remove leading "0"s
 
@@ -7781,9 +7781,9 @@ StrTab
 	.word LAB_COLD		; initial warm start vector (cold start)
 
 	.byte	$00			; these bytes are not used by BASIC
-	.word	$0000			; 
-	.word	$0000			; 
-	.word	$0000			; 
+	.word	$0000			;
+	.word	$0000			;
+	.word	$0000			;
 
 	.byte	$4C			; JMP opcode
 	.word	LAB_FCER		; initial user function vector ("Function call" error)

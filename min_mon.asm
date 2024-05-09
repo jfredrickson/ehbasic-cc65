@@ -14,16 +14,16 @@ NMI_vec	= IRQ_vec+$0A	; NMI code vector
 
 ; setup for the 6502 simulator environment
 
-IO_AREA	= $F000		; set I/O area for this monitor
+; IO_AREA	= $F000		; set I/O area for this monitor
 
-ACIAsimwr	= IO_AREA+$01	; simulated ACIA write port
-ACIAsimrd	= IO_AREA+$04	; simulated ACIA read port
+; ACIAsimwr	= IO_AREA+$01	; simulated ACIA write port
+; ACIAsimrd	= IO_AREA+$04	; simulated ACIA read port
 
 ; now the code. all this does is set up the vectors and interrupt code
 ; and wait for the user to select [C]old or [W]arm start. nothing else
 ; fits in less than 128 bytes
 
-	*=	$FF80			; pretend this is in a 1/8K ROM
+.segment "CODE"
 
 ; reset vector points here
 
@@ -31,6 +31,14 @@ RES_vec
 	CLD				; clear decimal mode
 	LDX	#$FF			; empty stack
 	TXS				; set the stack
+
+init_acia:
+  lda #$00
+  sta ACIA_STATUS     ; reset the ACIA by setting status to 0
+  lda #ACIA_CMD_FLAGS ; configure ACIA command flags
+  sta ACIA_CMD	    	; set ACIA command register
+  lda #ACIA_CTL_FLAGS	; configure ACIA control flags
+  sta ACIA_CTL    		; set ACIA control options
 
 ; set up vectors and interrupt code, copy them to page 2
 
@@ -70,17 +78,24 @@ LAB_dowarm
 ; byte out to simulated ACIA
 
 ACIAout
-	STA	ACIAsimwr		; save byte to simulated ACIA
-	RTS
+	pha									; push the character onto the stack to preserve it
+wait_txd_empty:
+  lda ACIA_STATUS     ; read the ACIA status register
+  and #%00010000      ; check the transmit data register empty flag
+  beq wait_txd_empty  ; if the transmit data register isn't empty yet, wait
+	pla									; pull the character back into the accumulator from the stack
+  sta ACIA_DATA       ; send the character to the ACIA TX/RX data register
+	rts
 
 ; byte in from simulated ACIA
 
 ACIAin
-	LDA	ACIAsimrd		; get byte from simulated ACIA
-	BEQ	LAB_nobyw		; branch if no byte waiting
-
-	SEC				; flag byte received
-	RTS
+  lda ACIA_STATUS     ; read the ACIA status register
+  and #%00001000      ; check the receive data available flag
+  beq LAB_nobyw   		; if no data available, branch
+  lda ACIA_DATA       ; read the received character from the ACIA data register
+	sec									; flag character received
+	rts
 
 LAB_nobyw
 	CLC				; flag no byte received
@@ -126,7 +141,7 @@ LAB_mess
 
 ; system vectors
 
-	*=	$FFFA
+.segment "VECTORS"
 
 	.word	NMI_vec		; NMI vector
 	.word	RES_vec		; RESET vector
