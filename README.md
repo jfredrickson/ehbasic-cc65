@@ -28,6 +28,8 @@ It should be possible to get up and running by mainly customizing the addresses 
 
 ## Changes to the original
 
+[Here is a diff between the original code and the modifications](https://github.com/jfredrickson/ehbasic-cc65/compare/5f05da0...main).
+
 * Replace program counter assignments (`*=`) with ca65 `.segment` commands.
 * Access a real ACIA in the example monitor, not a simulated one
 * Configure ACIA addressing in `main.s`
